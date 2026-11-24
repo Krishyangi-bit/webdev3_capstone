@@ -34,6 +34,11 @@ function normalizeError(err) {
   if (err && err.name === 'JsonWebTokenError') {
     return ApiError.unauthorized('Invalid token', 'TOKEN_INVALID');
   }
+  // Errors from Express internals such as express.static (404 for a missing file).
+  const status = err?.status || err?.statusCode;
+  if (status >= 400 && status < 500) {
+    return new ApiError(status, status === 404 ? 'File not found' : err.message);
+  }
   return null;
 }
 

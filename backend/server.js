@@ -2,8 +2,12 @@ const http = require('http');
 const env = require('./config/env');
 const app = require('./app');
 const { connectDatabase, disconnectDatabase } = require('./config/db');
+const { initSocket } = require('./sockets');
+const { registerListeners } = require('./events/listeners');
 
 const server = http.createServer(app);
+initSocket(server);
+registerListeners();
 
 server.on('error', async (err) => {
   if (err.code === 'EADDRINUSE') {
