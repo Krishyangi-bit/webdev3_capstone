@@ -21,6 +21,21 @@
   --color-error: #c65353;
   --color-error-soft: #f9eaea;
 
+  /* Status colours (complaint lifecycle) */
+  --status-submitted: #737b87;
+  --status-assigned: #315e8a;
+  --status-accepted: #4a6fa5;
+  --status-progress: #c28a35;
+  --status-resolved: #27845a;
+  --status-reopened: #c65353;
+  --status-closed: #4b525c;
+
+  /* Chart series - validated for colour-vision deficiency and contrast */
+  --chart-1: #2b6cb0;
+  --chart-2: #c0692b;
+  --chart-track: #eef0f3;
+  --chart-grid: #e9ebef;
+
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
