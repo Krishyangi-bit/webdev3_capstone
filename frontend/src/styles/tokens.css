@@ -1,0 +1,59 @@
+/* CampusFix design tokens - single source for colour, type and spacing. */
+:root {
+  /* Colour */
+  --color-bg: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f3f6;
+  --color-text: #20242b;
+  --color-text-secondary: #737b87;
+  --color-text-tertiary: #9aa1ab;
+  --color-border: #e6e8ec;
+  --color-border-strong: #d5d9df;
+
+  --color-accent: #315e8a;
+  --color-accent-hover: #284f75;
+  --color-accent-soft: #eaf0f6;
+
+  --color-success: #27845a;
+  --color-success-soft: #e7f3ec;
+  --color-warning: #c28a35;
+  --color-warning-soft: #f8f0e3;
+  --color-error: #c65353;
+  --color-error-soft: #f9eaea;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* Spacing (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Shape and depth */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --shadow-sm: 0 1px 2px rgba(32, 36, 43, 0.06);
+  --shadow-md: 0 4px 16px rgba(32, 36, 43, 0.1);
+
+  /* Layout */
+  --sidebar-width: 232px;
+  --topbar-height: 56px;
+  --control-height: 34px;
+}
