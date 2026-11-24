@@ -9,6 +9,9 @@ const refreshSessionSchema = new mongoose.Schema(
     expiresAt: { type: Date, required: true },
     userAgent: { type: String, maxlength: 300 },
     createdAt: { type: Date, default: Date.now },
+    // Set when this token is exchanged for a new one. Kept briefly so two
+    // tabs refreshing at the same moment are not mistaken for token theft.
+    rotatedAt: { type: Date },
   },
   { _id: false }
 );

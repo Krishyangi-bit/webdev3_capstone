@@ -4,20 +4,23 @@ const { ROLES } = require('../utils/constants');
 const tokenService = require('./tokenService');
 
 const MAX_SESSIONS_PER_USER = 5;
+const ROTATION_GRACE_MS = 20 * 1000;
 
 async function issueSession(user, userAgent) {
   const accessToken = tokenService.signAccessToken(user);
   const refresh = tokenService.signRefreshToken(user);
 
   const now = Date.now();
-  const sessions = (user.refreshSessions || []).filter((s) => s.expiresAt.getTime() > now);
-  sessions.push({
+  const live = (user.refreshSessions || []).filter((s) => s.expiresAt.getTime() > now);
+  const rotated = live.filter((s) => s.rotatedAt && now - s.rotatedAt.getTime() < ROTATION_GRACE_MS);
+  const active = live.filter((s) => !s.rotatedAt);
+  active.push({
     tokenHash: tokenService.hashToken(refresh.token),
     expiresAt: refresh.expiresAt,
     userAgent: (userAgent || '').slice(0, 300),
   });
-  // Keep only the most recent sessions.
-  user.refreshSessions = sessions.slice(-MAX_SESSIONS_PER_USER);
+  // Keep the most recent active sessions plus recently rotated tokens still in their grace window.
+  user.refreshSessions = [...rotated, ...active.slice(-MAX_SESSIONS_PER_USER)];
   await user.save();
 
   return { accessToken, refreshToken: refresh.token, refreshExpiresAt: refresh.expiresAt };
@@ -51,8 +54,9 @@ async function login({ email, password }, userAgent) {
 }
 
 // Refresh-token rotation: the presented token is exchanged for a new one and
-// invalidated. If a correctly-signed token is not in the session list it was
-// already used, which suggests theft, so every session for the user is revoked.
+// invalidated. If a correctly-signed token is presented again after it was
+// rotated (outside a short grace window for parallel tabs) it was already
+// used, which suggests theft, so every session for the user is revoked.
 async function refresh(refreshToken, userAgent) {
   if (!refreshToken) throw ApiError.unauthorized('No active session', 'REFRESH_MISSING');
 
@@ -68,7 +72,8 @@ async function refresh(refreshToken, userAgent) {
 
   const tokenHash = tokenService.hashToken(refreshToken);
   const session = user.refreshSessions.find((s) => s.tokenHash === tokenHash);
-  if (!session) {
+  const withinGrace = session?.rotatedAt && Date.now() - session.rotatedAt.getTime() < ROTATION_GRACE_MS;
+  if (!session || (session.rotatedAt && !withinGrace)) {
     user.refreshSessions = [];
     await user.save();
     throw ApiError.unauthorized('Session is no longer valid. Please sign in again.', 'REFRESH_REUSED');
@@ -79,7 +84,7 @@ async function refresh(refreshToken, userAgent) {
     throw ApiError.forbidden('Your account has been deactivated. Contact the administrator.');
   }
 
-  user.refreshSessions = user.refreshSessions.filter((s) => s.tokenHash !== tokenHash);
+  if (!session.rotatedAt) session.rotatedAt = new Date();
   const next = await issueSession(user, userAgent);
   return { user, ...next };
 }

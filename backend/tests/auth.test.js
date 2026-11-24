@@ -72,7 +72,18 @@ describe('authentication', () => {
     assert.equal(refreshed.status, 200);
     assert.notEqual(client.jar.cf_refresh, oldRefresh, 'refresh token rotated');
 
-    // Replaying the old token is treated as theft: all sessions are revoked.
+    // A second tab refreshing with the same token at the same moment is tolerated.
+    const parallelTab = createClient(ctx.baseUrl);
+    parallelTab.jar.cf_refresh = oldRefresh;
+    const parallel = await parallelTab.post('/api/auth/refresh');
+    assert.equal(parallel.status, 200, 'concurrent refresh within the grace window succeeds');
+
+    // Replaying the old token later is treated as theft: all sessions are revoked.
+    await User.updateOne(
+      { email: student.email },
+      { $set: { 'refreshSessions.$[s].rotatedAt': new Date(Date.now() - 60 * 1000) } },
+      { arrayFilters: [{ 's.rotatedAt': { $exists: true } }] }
+    );
     const attacker = createClient(ctx.baseUrl);
     attacker.jar.cf_refresh = oldRefresh;
     const replay = await attacker.post('/api/auth/refresh');
