@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Build output
+frontend/dist/
+
+# Uploaded complaint images (runtime data)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
