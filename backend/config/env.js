@@ -33,7 +33,6 @@ const env = Object.freeze({
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS) || 10,
-  overdueAfterHours: Number(process.env.OVERDUE_AFTER_HOURS) || 72,
 });
 
 module.exports = env;
