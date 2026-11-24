@@ -163,6 +163,17 @@ async function getAnalytics({ days } = {}) {
               count: { $sum: 1 },
               avgHours: { $avg: { $divide: [{ $subtract: ['$resolvedAt', '$createdAt'] }, HOUR_MS] } },
               avgRating: { $avg: '$feedback.rating' },
+            },
+          },
+        ],
+        // Share of complaints that were reported back as not fixed, among all
+        // complaints that have ever been resolved (including currently reopened ones).
+        reopens: [
+          { $match: { $or: [{ resolvedAt: { $ne: null } }, { reopenCount: { $gt: 0 } }] } },
+          {
+            $group: {
+              _id: null,
+              everResolved: { $sum: 1 },
               reopened: { $sum: { $cond: [{ $gt: ['$reopenCount', 0] }, 1, 0] } },
             },
           },
@@ -190,6 +201,7 @@ async function getAnalytics({ days } = {}) {
   const byStatus = Object.fromEntries(facets.byStatus.map((s) => [s._id, s.count]));
   const total = facets.byStatus.reduce((sum, s) => sum + s.count, 0);
   const resolution = facets.resolution[0] || {};
+  const reopens = facets.reopens[0] || {};
 
   return {
     range: { days: days || null, since },
@@ -203,7 +215,7 @@ async function getAnalytics({ days } = {}) {
       critical: await Complaint.countDocuments({ ...match, priority: 'Critical' }),
       avgResolutionHours: round1(resolution.avgHours),
       avgRating: round1(resolution.avgRating),
-      reopenRate: resolution.count ? round1((resolution.reopened / resolution.count) * 100) : null,
+      reopenRate: reopens.everResolved ? round1((reopens.reopened / reopens.everResolved) * 100) : null,
     },
     byStatus: toBuckets(facets.byStatus, STATUSES),
     byCategory: CATEGORIES.map((key) => {
